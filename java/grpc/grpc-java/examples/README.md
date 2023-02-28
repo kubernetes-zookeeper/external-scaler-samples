@@ -9,104 +9,13 @@ You may want to read through the
 [Quick Start](https://grpc.io/docs/languages/java/quickstart)
 before trying out the examples.
 
-## Basic examples
+## KEDA External Scaler Server
 
 - [External scaler](src/main/java/io/grpc/examples/externalscaler)
 
-- <details>
-  <summary>Hedging</summary>
+### <a name="to-build-the-examples"></a> To build the KEDA External Scaler Server example 
 
-  The demonstrates that enabling hedging
-  can reduce tail latency. (Users should note that enabling hedging may introduce other overhead;
-  and in some scenarios, such as when some server resource gets exhausted for a period of time and
-  almost every RPC during that time has high latency or fails, hedging may make things worse.
-  Setting a throttle in the service config is recommended to protect the server from too many
-  inappropriate retry or hedging requests.)
-
-  The server and the client in the example are basically the same as those in the
-  [external scaler](src/main/java/io/grpc/examples/externalscaler) example, except that the server mimics a
-  long tail of latency, and the client sends 2000 requests and can turn on and off hedging.
-
-  To mimic the latency, the server randomly delays the RPC handling by 2 seconds at 10% chance, 5
-  seconds at 5% chance, and 10 seconds at 1% chance.
-
-  When running the client enabling the following hedging policy
-
-  ```json
-        "hedgingPolicy": {
-          "maxAttempts": 3,
-          "hedgingDelay": "1s"
-        }
-  ```
-  Then the latency summary in the client log is like the following
-
-  ```text
-  Total RPCs sent: 2,000. Total RPCs failed: 0
-  [Hedging enabled]
-  ========================
-  50% latency: 0ms
-  90% latency: 6ms
-  95% latency: 1,003ms
-  99% latency: 2,002ms
-  99.9% latency: 2,011ms
-  Max latency: 5,272ms
-  ========================
-  ```
-
-  See [the section below](#to-build-the-examples) for how to build and run the example.
-
-  To disable hedging, set environment variable `DISABLE_HEDGING_IN_HEDGING_EXAMPLE=true` before
-  running the client. That produces a latency summary in the client log like the following
-
-  ```text
-  Total RPCs sent: 2,000. Total RPCs failed: 0
-  [Hedging disabled]
-  ========================
-  50% latency: 0ms
-  90% latency: 2,002ms
-  95% latency: 5,002ms
-  99% latency: 10,004ms
-  99.9% latency: 10,007ms
-  Max latency: 10,007ms
-  ========================
-  ```
-
-</details>
-
-- <details>
-  <summary>Retrying</summary>
-
-  The provides a ExternalScaler gRPC client &
-  server which demos the effect of client retry policy configured on the [ManagedChannel](
-  ../api/src/main/java/io/grpc/ManagedChannel.java) via [gRPC ServiceConfig](
-  https://github.com/grpc/grpc/blob/master/doc/service_config.md). Retry policy implementation &
-  configuration details are outlined in the [proposal](https://github.com/grpc/proposal/blob/master/A6-client-retries.md).
-
-  This retrying example is very similar to the in its setup.
-  The responds with
-  a status UNAVAILABLE error response to a specified percentage of requests to simulate server resource exhaustion and
-  general flakiness. The makes
-  a number of sequential requests to the server, several of which will be retried depending on the configured policy in
-  . Although the requests are blocking unary calls for simplicity, these could easily be changed to future unary calls in order to
-  test the result of request concurrency with retry policy enabled.
-
-  One can experiment with the 
-  failure conditions to simulate server throttling, as well as alter policy values in the [retrying_service_config.json](
-  src/main/resources/io/grpc/examples/retrying/retrying_service_config.json) to see their effects. To disable retrying
-  entirely, set environment variable `DISABLE_RETRYING_IN_RETRYING_EXAMPLE=true` before running the client.
-  Disabling the retry policy should produce many more failed gRPC calls as seen in the output log.
-
-  See [the section below](#to-build-the-examples) for how to build and run the example. The
-  executables for the server and the client are `retrying-external-scaler-server` and
-  `retrying-external-scaler-client`.
-
-</details>
-
-### <a name="to-build-the-examples"></a> To build the examples
-
-1. **[Install gRPC Java library SNAPSHOT locally, including code generation plugin](../COMPILING.md) (Only need this step for non-released versions, e.g. master HEAD).**
-
-2. From grpc-java/examples directory:
+1. From grpc-java/examples directory:
 ```
 $ ./gradlew clean docker
 ```
@@ -121,12 +30,6 @@ $ ./keda/install_keda.sh
 $ cd helm
 $ ./helm_install.sh
 $ helm upgrade --install external-scaler-server ./external-scaler-server/ --namespace external-scaler-server --create-namespace --values ./external-scaler-server/values.yaml
-```
-
-And in a different terminal window run:
-
-```
-$ ./build/install/examples/bin/external-scaler-client
 ```
 
 That's it!
