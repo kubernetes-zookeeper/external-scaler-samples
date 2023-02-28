@@ -19,6 +19,9 @@ package io.grpc.examples.externalscaler;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NettyServerBuilder;
+import java.net.InetSocketAddress;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -27,6 +30,8 @@ import java.util.List;
 import java.util.Random;
 import java.net.URISyntaxException;
 import javax.naming.CommunicationException;
+import com.google.common.net.InetAddresses;
+
 
 /**
  * Server that manages startup/shutdown of a {@code ExternalScaler} server.
@@ -38,12 +43,13 @@ public class ExternalScalerServer {
 
   private void start() throws IOException {
     /* The port on which the server should run */
+    String address = "0.0.0.0";
     int port = 50051;
-    server = ServerBuilder.forPort(port)
+    server = NettyServerBuilder.forAddress(new InetSocketAddress(InetAddresses.forString(address), port))
         .addService(new ExternalScalerImpl())
         .build()
         .start();
-    logger.info("Server started, listening on " + port);
+    logger.info("Server started, listening on " + address + ":" + port);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {

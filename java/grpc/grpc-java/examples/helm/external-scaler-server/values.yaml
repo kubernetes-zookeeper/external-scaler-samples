@@ -1,0 +1,118 @@
+nginx:
+  repository:
+  image: "nginx"
+  tag: "latest"
+  pullPolicy: Always
+  selectorLabels: "nginx"
+  subdomain: external-scaler-server
+
+externalScalerServer:
+  name: external-scaler-server
+  repository: 
+  image: "kuberneteszookeeper/external-scaler-server"
+  tag: "0.0.1"
+  pullPolicy: Always
+  selectorLabels: "external-scaler-server"
+  subdomain: external-scaler-server
+  service:
+    grpc:
+      port: 50051
+      targetPort: 50051
+      protocolName: grpc
+
+autoscaling:
+  deploymentName: nginx
+  # autoscaling.replicaCount controls the default replica count of the nginx deployment
+  replicaCount: 1
+  scaledObject:
+    # autoscaling.scaledObject.enabled controls whether to enable keda (Kubernetes Event driven Autoscaling) for the nginx service
+    enabled: true
+    # externalScalerAddress is {{ hostname }}.{{ subdomain }}.{{ namespace }}.svc.{{ cluster-domain }}
+    externalScalerAddress: external-scaler-server.external-scaler-server.external-scaler-server.svc.cluster.local
+    # pollingInterval is the interval to check each trigger on. By default KEDA will check each trigger source on every ScaledObject every 30 seconds.
+    pollingInterval:  30
+    # cooldownPeriod is the period to wait after the last trigger reported active before scaling the resource back to 0. By default it’s 5 minutes (300 seconds).
+    cooldownPeriod:   300
+    # Due to limitations in HPA controller the only supported value for the idleReplicaCount property is 0, it will not work correctly otherwise.
+    idleReplicaCount: 0
+    # minReplicaCount is the Minimum number of replicas KEDA will scale the resource down to. By default it’s scale to zero, but you can use it with some other value as well.
+    minReplicaCount:  1
+    # maxReplicaCount is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resouce.
+    maxReplicaCount:  100
+    # The fallback section defines a number of replicas to fallback to if a scaler is in an error state.
+    fallback: 
+      # KEDA will keep track of the number of consecutive times each scaler has failed to get metrics from its source.
+      # Once that value passes the failureThreshold, instead of not propagating a metric to the HPA (the default error behaviour), 
+      # the scaler will, instead, return a normalised metric using the formula:
+      # target metric value * fallback replicas
+      failureThreshold: 2880
+      # replicas is Mandatory if fallback section is included
+      replicas: 1
+    # advanced is Optional. Section to specify advanced options
+    advanced:
+      # This property specifies whether the target resource should be scaled back to original replicas count, after the ScaledObject is deleted. 
+      # Default behavior is to keep the replica count at the same number as it is in the moment of ScaledObject's deletion.
+      restoreToOriginalReplicaCount: true
+ 
+podAnnotations: {}
+
+podSecurityContext:
+  runAsUser: 1010
+  runAsNonRoot: true
+  runAsGroup: 1010
+  fsGroup: 1010
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsUser: 1010
+  # runAsNonRoot: true
+  # runAsGroup: 1010
+  # fsGroup: 1010
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: haproxy
+    ingress.kubernetes.io/secure-backends: "true"
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: external-scaler-server.eastus2.cloudapp.azure.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: external-scaler-server-tls
+     hosts:
+       - external-scaler-server.eastus2.cloudapp.azure.com
+   - secretName: external-scaler-server-tls-cluster-direct-connect
+     hosts:
+       - chart-example.local
+
+tolerations: []
+
+affinity: {}
+
+nameOverride: ""
+
+fullnameOverride: ""
+
+imagePullSecrets:
+   # imagePullSecrets is the array of names of the kubernetes secrets that are holding the credential keys of the docker registry for docker images
+ - name: external-scaler-server
+
+secrets:
+  imageCredentials:
+      # imageCredentials.registry is the Docker registry
+    - registry: 
+      # imageCredentials.username is the Docker user's username
+      username: "00000000-0000-0000-0000-000000000000"
+      # imageCredentials.accessToken is the Docker user's access token (recommened) or password
+      accessToken: ""

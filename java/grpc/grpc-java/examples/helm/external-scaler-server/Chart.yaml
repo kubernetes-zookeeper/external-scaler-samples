@@ -1,0 +1,14 @@
+apiVersion: v2
+name: external-scaler-server
+description: External Scaler Server
+type: application
+version: 1.0.0
+appVersion: 1.0.0.0
+home: https://keda.sh
+icon: https://helm.sh/img/helm.svg
+kubeVersion: '>=v1.17.0-0'
+maintainers:
+- email: ofer.yaniv@broadcom.com
+  name: Ofer Yaniv
+sources:
+- https://github.com/kubernetes-zookeeper/external-scaler-samples.git

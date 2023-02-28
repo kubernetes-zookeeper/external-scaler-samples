@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.externalScalerServer.subdomain }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusterIP: None
+  ports:
+  - name: {{ .Values.externalScalerServer.service.grpc.protocolName }}
+    port: {{ .Values.externalScalerServer.service.grpc.port }}
+    targetPort: {{ .Values.externalScalerServer.service.grpc.targetPort }}
+    protocol: TCP
+  selector:
+    name: {{ .Values.externalScalerServer.name }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "nginx"
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: "nginx"
+  template:
+    metadata:
+      labels:
+        name: nginx
+    spec:
+      hostname: nginx 
+      subdomain: {{ .Values.nginx.subdomain }}
+      containers:
+        - name: nginx
+          image: {{ $.Values.nginx.image }}:{{ $.Values.nginx.tag }}
+          imagePullPolicy: {{ $.Values.nginx.pullPolicy }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.externalScalerServer.name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: {{ .Values.externalScalerServer.name }}
+  template:
+    metadata:
+      name: {{ .Values.externalScalerServer.name }}
+      labels:
+        name: {{ .Values.externalScalerServer.name }}
+    spec:
+      hostname: {{ .Values.externalScalerServer.name }}
+      subdomain: {{ .Values.externalScalerServer.subdomain }}
+      containers:
+        - name: {{ .Values.externalScalerServer.name }}
+          image: {{ $.Values.externalScalerServer.image }}:{{ $.Values.externalScalerServer.tag }}
+          imagePullPolicy: {{ $.Values.externalScalerServer.pullPolicy }}
+---
