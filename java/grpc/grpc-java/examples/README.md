@@ -1,9 +1,5 @@
-gRPC Examples
+KEDA gRPC Example
 ==============================================
-
-The examples require `grpc-java` to already be built. You are strongly encouraged
-to check out a git release tag, since there will already be a build of gRPC
-available. Otherwise you must follow [COMPILING](../COMPILING.md).
 
 You may want to read through the
 [Quick Start](https://grpc.io/docs/languages/java/quickstart)
