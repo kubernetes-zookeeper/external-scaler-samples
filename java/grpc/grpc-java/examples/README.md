@@ -50,13 +50,13 @@ The docker log of the external-scaler-server pod is showing the response for the
 <br>
 <br>
 The `getMetricSpec` response specifies the name of custom application metric that should control the auto scaling and its target size.<br>
-In this specific example the returned `metricName` is `number_of_jobs` and its `targetSize` is `4`. That is, each nginx pod should not run more than 4 application jobs.<br>
+In this specific example the returned `metricName` is `"number_of_jobs"` and its `targetSize` is `"4"`. That is, each nginx pod should not run more than `"4"` application jobs.<br>
 In this specific example the polling interval (`pollingInterval`) is set to `30` seconds in helm [values.yaml](helm/external-scaler-server/values.yaml).
 <br>
 <br>
 The periodic `getMetrics` response specifies the value of the custom application metric.<br>
-The external KEDA ScaledObject is dividing the returned  value of the custom application metric by its target size ( `4` ) - and set the nginx number of nginx pods (`replicas`) accordingly.<br>
-For example, metricValue: 20 and targetSize: 4 will set the nginx `replicas` to 5 ( 20 applications jobs require 5 nginx pods ).
+The external KEDA ScaledObject is dividing the returned  value of the custom application metric by its target size ( `"4"` ) - and set the nginx number of nginx pods (`replicas`) accordingly.<br>
+For example, `metricValue: "20"` and `targetSize: "4"` will set the nginx `replicas` to 5 ( "20" applications jobs require 5 nginx pods ).
 <br>
 <br>
 In a different terminal window you may run and view the changing number of nginx pods:
