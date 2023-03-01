@@ -14,24 +14,26 @@ spec:
     name: {{ .Values.externalScalerServer.name }}
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .Values.nginx.kind }}
 metadata:
-  name: "nginx"
+  name: {{ .Values.nginx.name }}
   namespace: {{ $.Release.Namespace }}
 spec:
+  serviceName: {{ .Values.nginx.name }}
+  podManagementPolicy: {{ .Values.nginx.podManagementPolicy }}
   replicas: 1
   selector:
     matchLabels:
-      name: "nginx"
+      name: {{ .Values.nginx.name }}
   template:
     metadata:
       labels:
-        name: nginx
+        name: {{ .Values.nginx.name }}
     spec:
-      hostname: nginx 
+      hostname: {{ .Values.nginx.name }}
       subdomain: {{ .Values.nginx.subdomain }}
       containers:
-        - name: nginx
+        - name: {{ .Values.nginx.name }}
           image: {{ $.Values.nginx.image }}:{{ $.Values.nginx.tag }}
           imagePullPolicy: {{ $.Values.nginx.pullPolicy }}
 ---

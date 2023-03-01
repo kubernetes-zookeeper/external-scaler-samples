@@ -2,14 +2,14 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: nginx
+  name: {{ .Values.autoscaling.deploymentName }}
   namespace: {{ .Release.Namespace }}
 spec:
   scaleTargetRef:
     apiVersion:    apps/v1                                              # Optional. Default: apps/v1
-    kind:          Deployment                                           # Optional. Default: Deployment
+    kind:          {{ .Values.nginx.kind }}                             # Optional. Can be: StatefulSet or Deployment. Default: Deployment
     name:          {{ .Values.autoscaling.deploymentName }}             # Mandatory. Must be in the same namespace as the ScaledObject
-    envSourceContainerName: nginx
+    envSourceContainerName: {{ .Values.autoscaling.envSourceContainerName }}
   pollingInterval:    {{ .Values.autoscaling.scaledObject.pollingInterval }}
   cooldownPeriod:     {{ .Values.autoscaling.scaledObject.cooldownPeriod }}
   idleReplicaCount:   {{ .Values.autoscaling.scaledObject.idleReplicaCount }}
