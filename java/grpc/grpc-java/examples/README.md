@@ -38,10 +38,7 @@ You may run the following:
 $ kubectl -n external-scaler-server get ScaledObject
 $ kubectl -n external-scaler-server get HorizontalPodAutoScaler
 $ kubectl -n external-scaler-server get pods
-```
-```
-# replace {external-scaler-server-deployment} with the name of the external-scaler-server pod
-$ kubectl -n external-scaler-server logs -f {external-scaler-server-deployment}
+$ kubectl -n external-scaler-server logs -f -l name=external-scaler-server
 ```
 
 This example is scaling the number of nginx pods (`replicas`) based on the value of an application metric in real time.<br>
