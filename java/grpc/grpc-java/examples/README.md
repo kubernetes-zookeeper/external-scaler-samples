@@ -23,9 +23,12 @@ To try the external scaler please run:
 
 ```
 ./keda/install_keda.sh
-cd helm
-./helm_install.sh
-helm upgrade --install external-scaler-server ./external-scaler-server/ --namespace external-scaler-server --create-namespace --values ./external-scaler-server/values.yaml
+```
+```
+./helm/helm_install.sh
+```
+```
+helm upgrade --install external-scaler-server ./helm/external-scaler-server/ --namespace external-scaler-server --create-namespace --values ./helm/external-scaler-server/values.yaml
 ```
 
 That's it!<br>
