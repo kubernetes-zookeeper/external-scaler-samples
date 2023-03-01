@@ -13,7 +13,7 @@ before trying out the examples.
 
 1. From grpc-java/examples directory:
 ```
-$ ./gradlew clean docker
+./gradlew clean docker
 ```
 
 This creates the docker image `kuberneteszookeeper/external-scaler-server`.
@@ -22,10 +22,10 @@ The `kuberneteszookeeper/external-scaler-server` docker image should be accessib
 To try the external scaler please run:
 
 ```
-$ ./keda/install_keda.sh
-$ cd helm
-$ ./helm_install.sh
-$ helm upgrade --install external-scaler-server ./external-scaler-server/ --namespace external-scaler-server --create-namespace --values ./external-scaler-server/values.yaml
+./keda/install_keda.sh
+cd helm
+./helm_install.sh
+helm upgrade --install external-scaler-server ./external-scaler-server/ --namespace external-scaler-server --create-namespace --values ./external-scaler-server/values.yaml
 ```
 
 That's it!<br>
@@ -59,7 +59,7 @@ For example, `metricValue: "20"` and `targetSize: "4"` will set the nginx `repli
 In a different terminal window you may run and view the changing number of nginx pods:
 
 ```
-$ kubectl get pods -n external-scaler-server -w
+kubectl get pods -n external-scaler-server -w
 ```
 
 For more information, refer to KEDA
