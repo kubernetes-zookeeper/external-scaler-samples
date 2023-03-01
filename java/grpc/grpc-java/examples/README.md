@@ -35,10 +35,10 @@ Based on the value (and the target size for this metric), KEDA is scaling the re
 You may run the following:
 
 ```
-$ kubectl -n external-scaler-server get ScaledObject
-$ kubectl -n external-scaler-server get HorizontalPodAutoScaler
-$ kubectl -n external-scaler-server get pods
-$ kubectl -n external-scaler-server logs -f -l name=external-scaler-server
+kubectl -n external-scaler-server get ScaledObject
+kubectl -n external-scaler-server get HorizontalPodAutoScaler
+kubectl -n external-scaler-server get pods
+kubectl -n external-scaler-server logs -f -l name=external-scaler-server
 ```
 
 This example is scaling the number of nginx pods (`replicas`) based on the value of an application metric in real time.<br>
