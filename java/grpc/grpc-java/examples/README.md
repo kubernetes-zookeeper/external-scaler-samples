@@ -1,9 +1,18 @@
-KEDA gRPC Example
-==============================================
+Auto Scaling of Kubernetes pods using KEDA External Scaler
+==========================================================
 
 You may want to read through the
-[Quick Start](https://grpc.io/docs/languages/java/quickstart)
-before trying out the examples.
+[KEDA](https://keda.sh/)
+before trying out the following example.
+
+KEDA is a Kubernetes-based Event Driven Autoscaler. With KEDA, you can drive the scaling of any container in Kubernetes based on custom application metrics that are external to Kubernetes.<br>
+KEDA is introducing a new Kubernetes Custom Resource Definition called [ScaledObject](https://keda.sh/docs/2.9/concepts/scaling-deployments/#scaledobject-spec).
+KEDA ScaledObject is used to define how KEDA should scale your application and what the triggers are.<br>
+The external ScaledObject can be configured to periodically poll your application (over gRPC protocol) to get the name/value of the custom application metrics that should control the number of pods (`replicas`) for a specific Kubernetes Deployment/StatefulSet.<br><br>
+This simple example is showing how to easilly add the related gRPC endpoints to your application to support such custom Auto Scaling.<br>
+The gRPC API endpoints that should be added to your application are specified by the [externalscaler.proto](src/main/proto/externalscaler.proto).<br>
+The following example is building and running `external-scaler-server` that is serving as the gRPC server of your application.<br>
+Based on the periodic response from the `external-scaler-server`, KEDA external [ScaledObject](helm/external-scaler-server/templates/keda_scaled_object_deployment.yaml) is scaling the number of `nginx` pods (`replicas`).<br>
 
 ## KEDA External Scaler Server
 
