@@ -1,0 +1,7 @@
+external-scaler-web/build
+external-scaler-grpc/build
+external-scaler-web/.gradle
+external-scaler-grpc/.gradle
+.gradle
+.idea
+*.iml

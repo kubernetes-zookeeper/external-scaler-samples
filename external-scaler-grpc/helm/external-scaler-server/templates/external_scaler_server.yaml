@@ -54,7 +54,7 @@ spec:
       containers:
         - name: {{ .Values.worker.name }}
           image: {{ $.Values.worker.image }}:{{ $.Values.worker.tag }}
-          command: ["/bin/sh","-c"]
+          command: ["/bin/bash","-c"]
           args: ["while [ true ]; do NUMBER_OF_JOBS=`curl -s http://$EXTERNAL_SCALER_WEB:8080/external-scaler-web/api/jobs` && if [ \"$NUMBER_OF_JOBS\" = \"0\" ]; then i=0 && sleep 5 && continue; fi && i=$((i+1)) && echo \"Starting job $i on $HOSTNAME...\" && JOB_DURATION=$((MINIMUM_JOB_DURATION+RANDOM % (MAXIMUM_JOB_DURATION-MINIMUM_JOB_DURATION))) && echo \"Job $i duration is $JOB_DURATION seconds.\" && sleep $JOB_DURATION && echo \"Job $i is completed.\" && curl -X DELETE http://$EXTERNAL_SCALER_WEB:8080/external-scaler-web/api/jobs/1 && echo \"Job $i is deleted.\" && echo \"$i\" > /tmp/current_job_id; done"]
           imagePullPolicy: {{ $.Values.worker.pullPolicy }}
           env:
