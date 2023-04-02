@@ -1,0 +1,114 @@
+buildscript {
+dependencies {
+classpath 'com.google.guava:guava:debian'
+}
+}
+
+import com.google.common.collect.ImmutableMap
+
+plugins {
+    id 'application'
+    id 'com.google.protobuf' version '0.8.18'
+    id 'idea'
+    id("com.palantir.docker") version "0.22.1"
+    id("com.palantir.docker-run") version "0.22.1"
+}
+
+repositories {
+    maven { 
+        url "https://maven-central.storage-download.googleapis.com/maven2/" }
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def grpcVersion = '1.47.0'
+def protobufVersion = '3.19.2'
+def protocVersion = protobufVersion
+def version = '0.0.1'
+
+dependencies {
+    implementation "org.slf4j:slf4j-api:1.7.22"
+    implementation "org.apache.commons:commons-collections4:4.2"
+    implementation "org.apache.commons:commons-lang3:3.8.1"
+    implementation "org.jboss.resteasy:resteasy-servlet-initializer:4.6.2.Final"
+    implementation "org.jboss.resteasy:resteasy-client:4.6.2.Final"
+    implementation "org.jboss.resteasy:resteasy-jackson2-provider:4.6.2.Final"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.13.2.2"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "io.grpc:grpc-netty:${grpcVersion}"
+
+    compileOnly "org.apache.tomcat:annotations-api:6.0.53"
+
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+    runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
+
+    testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.mockito:mockito-core:3.4.0"
+}
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+    }
+    generateProtoTasks {
+        all()*.plugins { grpc {} }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
+startScripts.enabled = false
+
+
+task externalScalerServer(type: CreateStartScripts) {
+    mainClass = 'io.grpc.examples.externalscaler.ExternalScalerServer'
+    applicationName = 'external-scaler-server'
+    outputDir = new File(project.buildDir, 'tmp/scripts/' + name)
+    classpath = startScripts.classpath
+}
+
+task externalScalerClient(type: CreateStartScripts) {
+    mainClass = 'io.grpc.examples.externalscaler.ExternalScalerClient'
+    applicationName = 'external-scaler-client'
+    outputDir = new File(project.buildDir, 'tmp/scripts/' + name)
+    classpath = startScripts.classpath
+}
+
+
+
+applicationDistribution.into('bin') {
+    from(externalScalerServer)
+    from(externalScalerClient)
+    fileMode = 0755
+}
+
+docker {
+    name = "kuberneteszookeeper/external-scaler-server:".plus(version)
+    uri("kuberneteszookeeper/external-scaler-server:".plus(version))
+    tag("name", "external-scaler-server")
+    buildArgs(ImmutableMap.of("name", "external-scaler-server"))
+    files '.'
+    pull(true)
+    setDockerfile(file("src/main/docker/Dockerfile"))
+}
+
+dockerRun {
+    name = "external-scaler-server"
+    image = "kuberneteszookeeper/external-scaler-server:".plus(version)
+    ports("8080:8080")
+}

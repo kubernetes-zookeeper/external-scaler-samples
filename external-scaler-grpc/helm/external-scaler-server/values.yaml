@@ -1,0 +1,76 @@
+worker:
+  name: worker
+  kind: StatefulSet
+  repository:
+  image: "tomcat"
+  tag: "jre11"
+  pullPolicy: Always
+  selectorLabels: "worker"
+  subdomain: external-scaler-server
+  podManagementPolicy: "Parallel"
+
+externalScalerWeb:
+  name: external-scaler-web
+  repository: 
+  image: "kuberneteszookeeper/external-scaler-web"
+  tag: "0.0.1"
+  pullPolicy: Always
+  selectorLabels: "external-scaler-web"
+  subdomain: external-scaler-web
+  service:
+    port: 8080
+    targetPort: 8080
+    protocolName: http
+
+externalScalerServer:
+  name: external-scaler-server
+  repository: 
+  image: "kuberneteszookeeper/external-scaler-server"
+  tag: "0.0.1"
+  pullPolicy: Always
+  selectorLabels: "external-scaler-server"
+  subdomain: external-scaler-server
+  numberOfJobsPerServer: "4"
+  minimumJobDuration: "10"
+  maximumJobDuration: "20"
+  service:
+    grpc:
+      port: 50051
+      targetPort: 50051
+      protocolName: grpc
+
+autoscaling:
+  deploymentName: worker
+  envSourceContainerName: worker
+  # autoscaling.replicaCount controls the default replica count of the worker stateful set
+  replicaCount: 0
+  scaledObject:
+    # autoscaling.scaledObject.enabled controls whether to enable keda (Kubernetes Event driven Autoscaling) for the worker service
+    enabled: true
+    # externalScalerAddress is {{ hostname }}.{{ subdomain }}.{{ namespace }}.svc.{{ cluster-domain }}
+    externalScalerAddress: external-scaler-server.external-scaler-server.external-scaler-server.svc.cluster.local
+    externalScalerWebAddress: external-scaler-web.external-scaler-web.external-scaler-server.svc.cluster.local
+    # pollingInterval is the interval to check each trigger on. By default KEDA will check each trigger source on every ScaledObject every 30 seconds.
+    pollingInterval:  10
+    # cooldownPeriod is the period to wait after the last trigger reported active before scaling the resource back to 0. By default it’s 5 minutes (300 seconds).
+    cooldownPeriod:   300
+    # Due to limitations in HPA controller the only supported value for the idleReplicaCount property is 0, it will not work correctly otherwise.
+    idleReplicaCount: 0
+    # minReplicaCount is the Minimum number of replicas KEDA will scale the resource down to. By default it’s scale to zero, but you can use it with some other value as well.
+    minReplicaCount:  0
+    # maxReplicaCount is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resouce.
+    maxReplicaCount:  100
+    # The fallback section defines a number of replicas to fallback to if a scaler is in an error state.
+    fallback: 
+      # KEDA will keep track of the number of consecutive times each scaler has failed to get metrics from its source.
+      # Once that value passes the failureThreshold, instead of not propagating a metric to the HPA (the default error behaviour), 
+      # the scaler will, instead, return a normalised metric using the formula:
+      # target metric value * fallback replicas
+      failureThreshold: 2880
+      # replicas is Mandatory if fallback section is included
+      replicas: 0
+    # advanced is Optional. Section to specify advanced options
+    advanced:
+      # This property specifies whether the target resource should be scaled back to original replicas count, after the ScaledObject is deleted. 
+      # Default behavior is to keep the replica count at the same number as it is in the moment of ScaledObject's deletion.
+      restoreToOriginalReplicaCount: true

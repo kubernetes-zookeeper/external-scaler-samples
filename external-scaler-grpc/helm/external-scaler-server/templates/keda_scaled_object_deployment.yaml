@@ -1,0 +1,36 @@
+{{- if .Values.autoscaling.scaledObject.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Values.autoscaling.deploymentName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1                                                          # Optional. Default: apps/v1
+    kind:                   {{ .Values.worker.kind }}                            # Optional. Can be: StatefulSet or Deployment. Default: Deployment
+    name:                   {{ .Values.autoscaling.deploymentName }}             # Mandatory. Must be in the same namespace as the ScaledObject
+    envSourceContainerName: {{ .Values.autoscaling.envSourceContainerName }}
+  pollingInterval:          {{ .Values.autoscaling.scaledObject.pollingInterval }}
+  cooldownPeriod:           {{ .Values.autoscaling.scaledObject.cooldownPeriod }}
+  idleReplicaCount:         {{ .Values.autoscaling.scaledObject.idleReplicaCount }}
+  minReplicaCount:          {{ .Values.autoscaling.scaledObject.minReplicaCount }}
+  maxReplicaCount:          {{ .Values.autoscaling.scaledObject.maxReplicaCount }}
+  fallback:
+    failureThreshold:       {{ .Values.autoscaling.scaledObject.fallback.failureThreshold }}
+    replicas:               {{ .Values.autoscaling.scaledObject.fallback.replicas }}
+  advanced:
+    restoreToOriginalReplicaCount: {{ .Values.autoscaling.scaledObject.advanced.restoreToOriginalReplicaCount }}
+    horizontalPodAutoscalerConfig:                   # Optional. Section to specify HPA related options
+      behavior:                                      # Optional. Use to modify HPA's scaling behavior
+        scaleDown:
+          stabilizationWindowSeconds: 30
+          policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15
+  triggers:
+  - type: external
+    metadata:
+      scalerAddress: {{ .Values.autoscaling.scaledObject.externalScalerAddress }}:{{ .Values.externalScalerServer.service.grpc.port }}
+      serviceOrchestrationUrl: http://{{ .Values.autoscaling.scaledObject.externalScalerWebAddress }}:8080/external-scaler-web/api/jobs
+{{- end }}

@@ -1,0 +1,10 @@
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+	}
+}
+rootProject.name = "external-scaler-samples"
+
+include ':external-scaler-web', ':external-scaler-grpc'
+project(':external-scaler-web').projectDir = new File('external-scaler-web')
+project(':external-scaler-grpc').projectDir = new File('external-scaler-grpc')

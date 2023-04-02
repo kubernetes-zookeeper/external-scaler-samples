@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.externalScalerWeb.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: {{ .Values.externalScalerWeb.name }}
+spec:
+  clusterIP: None
+  ports:
+  - name: {{ .Values.externalScalerWeb.service.protocolName }}
+    port: {{ .Values.externalScalerWeb.service.port }}
+    targetPort: {{ .Values.externalScalerWeb.service.targetPort }}
+    protocol: TCP
+  selector:
+    name: {{ .Values.externalScalerWeb.name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.externalScalerServer.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: {{ .Values.externalScalerServer.name }}
+spec:
+  clusterIP: None
+  ports:
+  - name: {{ .Values.externalScalerServer.service.grpc.protocolName }}
+    port: {{ .Values.externalScalerServer.service.grpc.port }}
+    targetPort: {{ .Values.externalScalerServer.service.grpc.targetPort }}
+    protocol: TCP
+  selector:
+    name: {{ .Values.externalScalerServer.name }}
+---
+apiVersion: apps/v1
+kind: {{ .Values.worker.kind }}
+metadata:
+  name: {{ .Values.worker.name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  serviceName: {{ .Values.worker.name }}
+  podManagementPolicy: {{ .Values.worker.podManagementPolicy }}
+  replicas: {{ .Values.autoscaling.replicaCount }}
+  selector:
+    matchLabels:
+      name: {{ .Values.worker.name }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.worker.name }}
+    spec:
+      hostname: {{ .Values.worker.name }}
+      subdomain: {{ .Values.worker.subdomain }}
+      containers:
+        - name: {{ .Values.worker.name }}
+          image: {{ $.Values.worker.image }}:{{ $.Values.worker.tag }}
+          command: ["/bin/sh","-c"]
+          args: ["while [ true ]; do NUMBER_OF_JOBS=`curl -s http://$EXTERNAL_SCALER_WEB:8080/external-scaler-web/api/jobs` && if [ \"$NUMBER_OF_JOBS\" = \"0\" ]; then i=0 && sleep 5 && continue; fi && i=$((i+1)) && echo \"Starting job $i on $HOSTNAME...\" && JOB_DURATION=$((MINIMUM_JOB_DURATION+RANDOM % (MAXIMUM_JOB_DURATION-MINIMUM_JOB_DURATION))) && echo \"Job $i duration is $JOB_DURATION seconds.\" && sleep $JOB_DURATION && echo \"Job $i is completed.\" && curl -X DELETE http://$EXTERNAL_SCALER_WEB:8080/external-scaler-web/api/jobs/1 && echo \"Job $i is deleted.\" && echo \"$i\" > /tmp/current_job_id; done"]
+          imagePullPolicy: {{ $.Values.worker.pullPolicy }}
+          env:
+            - name: NUMBER_OF_JOBS_PER_SERVER
+              value: "{{ .Values.externalScalerServer.numberOfJobsPerServer }}"
+            - name: MINIMUM_JOB_DURATION 
+              value: "{{ .Values.externalScalerServer.minimumJobDuration }}"
+            - name: MAXIMUM_JOB_DURATION 
+              value: "{{ .Values.externalScalerServer.maximumJobDuration }}"
+            - name: EXTERNAL_SCALER_WEB 
+              value: {{ .Values.autoscaling.scaledObject.externalScalerWebAddress }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["while [ true ]; do COMPLETED_JOB_ID=`[ -e \"/tmp/current_job_id\" ] && cat /tmp/current_job_id || echo 0` && if [ \"$COMPLETED_JOB_ID\" = \"$NUMBER_OF_JOBS_PER_SERVER\" ]; then break; else echo \"Waiting for job $(($COMPLETED_JOB_ID + 1))...\"; fi && echo \"Sleeping $MAXIMUM_JOB_DURATION...\" && sleep $MAXIMUM_JOB_DURATION ; done && /bin/rm /tmp/current_job_id && echo \"All $NUMBER_OF_JOBS_PER_SERVER jobs of $HOSTNAME are completed.\""]
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.externalScalerWeb.name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: {{ .Values.externalScalerWeb.name }}
+  template:
+    metadata:
+      name: {{ .Values.externalScalerWeb.name }}
+      labels:
+        name: {{ .Values.externalScalerWeb.name }}
+    spec:
+      hostname: {{ .Values.externalScalerWeb.name }}
+      subdomain: {{ .Values.externalScalerWeb.subdomain }}
+      containers:
+        - name: {{ .Values.externalScalerWeb.name }}
+          image: {{ $.Values.externalScalerWeb.image }}:{{ $.Values.externalScalerWeb.tag }}
+          imagePullPolicy: {{ $.Values.externalScalerWeb.pullPolicy }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.externalScalerServer.name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: {{ .Values.externalScalerServer.name }}
+  template:
+    metadata:
+      name: {{ .Values.externalScalerServer.name }}
+      labels:
+        name: {{ .Values.externalScalerServer.name }}
+    spec:
+      hostname: {{ .Values.externalScalerServer.name }}
+      subdomain: {{ .Values.externalScalerServer.subdomain }}
+      containers:
+        - name: {{ .Values.externalScalerServer.name }}
+          image: {{ $.Values.externalScalerServer.image }}:{{ $.Values.externalScalerServer.tag }}
+          imagePullPolicy: {{ $.Values.externalScalerServer.pullPolicy }}
+          env:
+            - name: NUMBER_OF_JOBS_PER_SERVER
+              value: "{{ .Values.externalScalerServer.numberOfJobsPerServer }}"
+---

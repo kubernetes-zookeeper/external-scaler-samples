@@ -1,0 +1,60 @@
+buildscript {
+dependencies {
+classpath 'com.google.guava:guava:debian'
+}
+}
+
+import com.google.common.collect.ImmutableMap
+
+plugins {
+    id 'application'
+    id 'com.google.protobuf' version '0.8.18'
+    id 'idea'
+    id("com.palantir.docker") version "0.22.1"
+}
+
+repositories {
+    maven {
+        url "https://maven-central.storage-download.googleapis.com/maven2/" }
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+repositories {
+    maven {
+        url "https://maven-central.storage-download.googleapis.com/maven2/" }
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+apply plugin: 'java'
+apply plugin: 'war'
+
+def version = '0.0.1'
+
+dependencies {
+       implementation  'org.apache.tomcat:tomcat-servlet-api:10.0.0-M4'
+       implementation  'org.jboss.resteasy:resteasy-core:6.2.3.Final'
+       implementation  'org.jboss.resteasy:resteasy-client:6.2.3.Final'
+       implementation  'org.jboss.resteasy:resteasy-jaxb-provider:6.2.3.Final'
+       implementation  'org.jboss.resteasy:resteasy-jackson2-provider:6.2.3.Final'
+       implementation  'org.jboss.resteasy:resteasy-servlet-initializer:6.2.3.Final'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': ''
+    }
+}
+
+docker {
+    name = "kuberneteszookeeper/external-scaler-web:".plus(version)
+    uri("kuberneteszookeeper/external-scaler-web:".plus(version))
+    tag("name", "external-scaler-web")
+    buildArgs(ImmutableMap.of("name", "external-scaler-web"))
+    files '.'
+    pull(true)
+    setDockerfile(file("src/main/docker/Dockerfile"))
+}
