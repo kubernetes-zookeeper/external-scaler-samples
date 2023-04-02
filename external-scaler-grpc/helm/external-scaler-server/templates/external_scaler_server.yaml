@@ -69,7 +69,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["while [ true ]; do COMPLETED_JOB_ID=`[ -e \"/tmp/current_job_id\" ] && cat /tmp/current_job_id || echo 0` && if [ \"$COMPLETED_JOB_ID\" = \"$NUMBER_OF_JOBS_PER_SERVER\" ]; then break; else echo \"Waiting for job $(($COMPLETED_JOB_ID + 1))...\"; fi && echo \"Sleeping $MAXIMUM_JOB_DURATION...\" && sleep $MAXIMUM_JOB_DURATION ; done && /bin/rm /tmp/current_job_id && echo \"All $NUMBER_OF_JOBS_PER_SERVER jobs of $HOSTNAME are completed.\""]
+                command: ["while [ true ]; do COMPLETED_JOB_ID=`[ -e \"/tmp/current_job_id\" ] && cat /tmp/current_job_id || echo 0` && if [ \"$COMPLETED_JOB_ID\" != \"0\" ]; then break; else echo \"Waiting for job $(($COMPLETED_JOB_ID + 1))...\"; fi && echo \"Sleeping $MAXIMUM_JOB_DURATION...\" && sleep $MAXIMUM_JOB_DURATION ; done && /bin/rm /tmp/current_job_id && echo \"All $NUMBER_OF_JOBS_PER_SERVER jobs of $HOSTNAME are completed.\""]
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: apps/v1

@@ -53,7 +53,7 @@ autoscaling:
     # pollingInterval is the interval to check each trigger on. By default KEDA will check each trigger source on every ScaledObject every 30 seconds.
     pollingInterval:  10
     # cooldownPeriod is the period to wait after the last trigger reported active before scaling the resource back to 0. By default it’s 5 minutes (300 seconds).
-    cooldownPeriod:   300
+    cooldownPeriod:   10
     # Due to limitations in HPA controller the only supported value for the idleReplicaCount property is 0, it will not work correctly otherwise.
     idleReplicaCount: 0
     # minReplicaCount is the Minimum number of replicas KEDA will scale the resource down to. By default it’s scale to zero, but you can use it with some other value as well.
@@ -66,7 +66,7 @@ autoscaling:
       # Once that value passes the failureThreshold, instead of not propagating a metric to the HPA (the default error behaviour), 
       # the scaler will, instead, return a normalised metric using the formula:
       # target metric value * fallback replicas
-      failureThreshold: 2880
+      failureThreshold: 3
       # replicas is Mandatory if fallback section is included
       replicas: 0
     # advanced is Optional. Section to specify advanced options
