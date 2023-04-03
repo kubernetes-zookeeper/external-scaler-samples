@@ -16,6 +16,11 @@
 
 package io.grpc.examples.externalscaler;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -29,8 +34,6 @@ import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link ExternalScalerClient}.

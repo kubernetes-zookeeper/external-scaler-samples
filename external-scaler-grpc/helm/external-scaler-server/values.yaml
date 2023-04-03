@@ -3,7 +3,7 @@ worker:
   kind: StatefulSet
   repository:
   image: "tomcat"
-  tag: "jre11"
+  tag: "10.0.23-jdk11-corretto-al2"
   pullPolicy: Always
   selectorLabels: "worker"
   subdomain: external-scaler-server
