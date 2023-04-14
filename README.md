@@ -106,7 +106,7 @@ Use the following commands to delete resources created during this post:
 helm uninstall external-scaler-server --namespace external-scaler-server
 ```
 ```
-helm uninstall keda --namespace $KEDA_NAMESPACE
+helm uninstall keda --namespace keda
 ```
 
 For more information, refer to KEDA
