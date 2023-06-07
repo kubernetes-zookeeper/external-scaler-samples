@@ -17,7 +17,6 @@ plugins {
 repositories {
     maven { 
         url "https://maven-central.storage-download.googleapis.com/maven2/" }
-    jcenter()
     mavenCentral()
     mavenLocal()
 }
@@ -102,7 +101,7 @@ docker {
     uri("kuberneteszookeeper/external-scaler-server:".plus(version))
     tag("name", "external-scaler-server")
     buildArgs(ImmutableMap.of("name", "external-scaler-server"))
-    files '.'
+    files '.', '../gradle'
     pull(true)
     setDockerfile(file("src/main/docker/Dockerfile"))
 }

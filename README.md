@@ -21,8 +21,11 @@ Based on the periodic response from the `external-scaler-server`, KEDA external 
 ### <a name="to-build-the-examples"></a> To build the [KEDA](https://keda.sh/docs/latest/concepts/external-scalers/) External Scaler Server example 
 
 1. From the top level `external-scaler-samples` directory:
+   Download gradle 7.4 package and extract it to the gradle folder.
 ```
-./gradlew clean docker
+wget -O gradle.zip https://services.gradle.org/distributions/gradle-7.4-bin.zip && unzip gradle.zip && /bin/mv gradle-7.4 gradle
+
+./gradle/bin/gradle clean docker
 ```
 
 This creates the docker images `kuberneteszookeeper/external-scaler-web` and `kuberneteszookeeper/external-scaler-server`.

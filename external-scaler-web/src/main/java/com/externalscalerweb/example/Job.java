@@ -2,6 +2,11 @@ package com.externalscalerweb.example;
 
 import java.util.Objects;
 
+/* 
+ * The Job class is representing a job
+ * Its data member is the numeric integer id of the job
+ *
+ */
 public class Job {
     private int id;
 

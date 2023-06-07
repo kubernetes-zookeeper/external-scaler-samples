@@ -34,47 +34,54 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/* 
+ * Simple HTTP Client that is used by the gRPC External Metrics Scaler Server 
+ * for getting the current value of the external scaler metric from the External Scaler Web Server 
+ *
+ */
 public final class HttpClientUtils {
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
 
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final int DEFAULT_CONNECTION_TIMEOUT = 60;
-    private static final int DEFAULT_READ_TIMEOUT = 119;
+    private static final int DEFAULT_READ_TIMEOUT = 120;
 
+/*
+ * executeGetRequest is sending an HTTP GET request to the specified URL path and returns the HTTP response
+ *
+ */
     public static <T, E> T executeGetRequest(String path, boolean trustAnySSLCertificate, Class<T> responseClass, Class<E> errorClass)
             throws URISyntaxException, IOException, CommunicationException {
         return executeGetRequest(path, null, trustAnySSLCertificate, responseClass, errorClass);
     }
 
-    public static <T, U, E> T executePostRequest(String path, Map<String, String> requestParameters, boolean trustAnySSLCertificate, U request, Class<T> responseClass, Class<E> errorClass)
-            throws IOException, CommunicationException, URISyntaxException {
-        String maskedPath = path;
-        logger.debug("Http Post request url: [{}]", maskedPath);
-        StringEntity stringEntity = null;
-        if (request != null) stringEntity = new StringEntity(objectMapper.writeValueAsString(request));
-        HttpRequestBase requestBase = getRequestPost(path, requestParameters, stringEntity);
-        return executeRequest(requestBase, trustAnySSLCertificate, responseClass, errorClass);
+/*
+ * Private methods
+ *
+ */
+    private static <T, E> T executeGetRequest(String path,
+                                              Map<String, String> requestParameters, boolean trustAnySSLCertificate, Class<T> responseClass, Class<E> errorClass)
+            throws URISyntaxException, IOException, CommunicationException {
+        logger.debug("Http Get request url: [{}]", path);
+        HttpRequestBase request = getRequestGet(path, requestParameters);
+        return executeRequest(request, trustAnySSLCertificate, responseClass, errorClass);
     }
 
-    public static <T, U, E> T executePostRequest(String path, boolean trustAnySSLCertificate, U request, Class<T> responseClass, Class<E> errorClass)
-            throws IOException, CommunicationException, URISyntaxException {
-        return executePostRequest(path, null, trustAnySSLCertificate, request, responseClass, errorClass);
+    private static HttpRequestBase getRequestGet(String urlPath, Map<String, String> requestParameters)
+            throws URISyntaxException {
+        String urlWithParameters = addUrlParameters(urlPath, requestParameters);
+        HttpGet httpGet = new HttpGet(urlWithParameters);
+        addCrumbsToRequest(httpGet);
+        return httpGet;
     }
 
-    public static <T, U, E> T executePutRequest(String path, Map<String, String> requestParameters, boolean trustAnySSLCertificate, U request, Class<T> responseClass, Class<E> errorClass)
-            throws IOException, CommunicationException, URISyntaxException {
-        String maskedPath = path;
-        logger.debug("Http Put request url: [{}]", maskedPath);
-        StringEntity stringEntity = null;
-        if (request != null) stringEntity = new StringEntity(objectMapper.writeValueAsString(request));
-        HttpRequestBase requestBase = getRequestPut(path, requestParameters, stringEntity);
-        return executeRequest(requestBase, trustAnySSLCertificate, responseClass, errorClass);
-    }
-
-    public static <T, U, E> T executePutRequest(String path, boolean trustAnySSLCertificate, U request, Class<T> responseClass, Class<E> errorClass)
-            throws IOException, CommunicationException, URISyntaxException {
-        return executePutRequest(path, null, trustAnySSLCertificate, request, responseClass, errorClass);
+    private static String addUrlParameters(String url, Map<String, String> urlParameters) throws URISyntaxException {
+        URIBuilder builder = new URIBuilder(url);
+        if (urlParameters != null) {
+            urlParameters.forEach(builder::setParameter);
+        }
+        return builder.build().toASCIIString();
     }
 
     private static <T, E> T executeRequest(HttpRequestBase request, boolean trustAnySSLCertificate, Class<T> responseClass, Class<E> errorClass)
@@ -122,7 +129,6 @@ public final class HttpClientUtils {
         for (Header header : headers) {
             logger.debug("Header: [{}]: [{}].", header.getName(), header.getValue());
         }
-
     }
 
     private static CloseableHttpClient getClient(HttpRequestBase httpRequest, boolean trustAnySSLCertificate) throws IOException {
@@ -234,45 +240,5 @@ public final class HttpClientUtils {
     private static int getConnectionTimeout() {
         int connectionTimeOut = getIntProperty("cdd.plugins.servicevirtualization.client.http.connection.timeout");
         return connectionTimeOut != 0 ? connectionTimeOut : DEFAULT_CONNECTION_TIMEOUT;
-    }
-
-    private static HttpRequestBase getRequestGet(String urlPath, Map<String, String> requestParameters)
-            throws URISyntaxException {
-        String urlWithParameters = addUrlParameters(urlPath, requestParameters);
-        HttpGet httpGet = new HttpGet(urlWithParameters);
-        addCrumbsToRequest(httpGet);
-        return httpGet;
-    }
-
-    private static HttpRequestBase getRequestPost(String urlPath, Map<String, String> requestParameters, HttpEntity entity) throws URISyntaxException {
-        String urlWithParameters = addUrlParameters(urlPath, requestParameters);
-        HttpPost request = new HttpPost(urlWithParameters);
-        if (entity != null) request.setEntity(entity);
-        addCrumbsToRequest(request);
-        return request;
-    }
-
-    private static HttpRequestBase getRequestPut(String urlPath, Map<String, String> requestParameters, HttpEntity entity) throws URISyntaxException {
-        String urlWithParameters = addUrlParameters(urlPath, requestParameters);
-        HttpPut request = new HttpPut(urlWithParameters);
-        if (entity != null) request.setEntity(entity);
-        addCrumbsToRequest(request);
-        return request;
-    }
-
-    private static String addUrlParameters(String url, Map<String, String> urlParameters) throws URISyntaxException {
-        URIBuilder builder = new URIBuilder(url);
-        if (urlParameters != null) {
-            urlParameters.forEach(builder::setParameter);
-        }
-        return builder.build().toASCIIString();
-    }
-
-    private static <T, E> T executeGetRequest(String path,
-                                              Map<String, String> requestParameters, boolean trustAnySSLCertificate, Class<T> responseClass, Class<E> errorClass)
-            throws URISyntaxException, IOException, CommunicationException {
-        logger.debug("Http Get request url: [{}]", path);
-        HttpRequestBase request = getRequestGet(path, requestParameters);
-        return executeRequest(request, trustAnySSLCertificate, responseClass, errorClass);
     }
 }

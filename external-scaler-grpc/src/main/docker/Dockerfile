@@ -2,9 +2,11 @@ FROM amazoncorretto:8 AS build
 
 COPY . /opt/external-scaler-server/
 
+COPY ./bin ./lib ./init.d /opt/external-scaler-server/
+
 WORKDIR /opt/external-scaler-server
 
-RUN ./gradlew clean installDist --no-daemon
+RUN ./bin/gradle clean installDist --no-daemon
 
 FROM amazoncorretto:8
 

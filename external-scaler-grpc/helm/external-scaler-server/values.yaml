@@ -2,8 +2,8 @@ worker:
   name: worker
   kind: StatefulSet
   repository:
-  image: "tomcat"
-  tag: "10.0.23-jdk11-corretto-al2"
+  image: "amazonlinux"
+  tag: "latest"
   pullPolicy: Always
   selectorLabels: "worker"
   subdomain: external-scaler-server

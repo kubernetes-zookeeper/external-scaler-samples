@@ -2,12 +2,17 @@ package com.externalscalerweb.example;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/*
+ * JobContainer Singleton is holding the current value of the external scaler metric: number of jobs
+ * The JobContainer client can create a new job, delete a completed job and get the current number of jobs
+ *
+ */
 public class JobContainer {
 
     private static JobContainer jobContainer;
     private AtomicInteger numberOfJobs = new AtomicInteger(0);
 
-    JobContainer() {
+    private JobContainer() {
     }
 
     public static JobContainer instance() {

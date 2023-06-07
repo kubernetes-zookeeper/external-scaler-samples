@@ -3,6 +3,15 @@ package com.externalscalerweb.example;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+/*
+ * The JobManager class is the REST API controller for the Tomcat External Web application
+ * It is supporting 4 REST API calls that are called by the External Scaler gRPC Server and the Worker nodes
+ * - GET /jobs
+ * - GET /jobs/{id}
+ * - POST /jobs
+ * - DELETE /jobs/{id}
+ *
+ */
 @Path("jobs")
 public class JobManager {
 
