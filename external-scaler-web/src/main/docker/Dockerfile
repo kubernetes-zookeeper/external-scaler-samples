@@ -1,4 +1,4 @@
-FROM amazoncorretto:11 AS build
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:11 AS build
 
 ENV TOMCAT_MAJOR=10
 
@@ -26,7 +26,7 @@ RUN /bin/mv /opt/external-scaler-web/build/libs/external-scaler-web.war /usr/loc
 
 RUN chmod a+x /usr/local/tomcat/bin/*.sh
 
-FROM amazoncorretto:11
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:11
  
 COPY --from=build /usr/local/tomcat /usr/local/tomcat
 

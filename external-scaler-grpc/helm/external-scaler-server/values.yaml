@@ -1,8 +1,10 @@
+registry:
+imagePullSecret: registrycredentials
+
 worker:
   name: worker
   kind: StatefulSet
-  repository:
-  image: "amazonlinux"
+  image: "public.ecr.aws/amazonlinux/amazonlinux"
   tag: "latest"
   pullPolicy: Always
   selectorLabels: "worker"
@@ -11,7 +13,6 @@ worker:
 
 externalScalerWeb:
   name: external-scaler-web
-  repository: 
   image: "kuberneteszookeeper/external-scaler-web"
   tag: "0.0.1"
   pullPolicy: Always
@@ -24,7 +25,6 @@ externalScalerWeb:
 
 externalScalerServer:
   name: external-scaler-server
-  repository: 
   image: "kuberneteszookeeper/external-scaler-server"
   tag: "0.0.1"
   pullPolicy: Always

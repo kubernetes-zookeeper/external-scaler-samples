@@ -92,8 +92,10 @@ spec:
       subdomain: {{ .Values.externalScalerWeb.subdomain }}
       containers:
         - name: {{ .Values.externalScalerWeb.name }}
-          image: {{ $.Values.externalScalerWeb.image }}:{{ $.Values.externalScalerWeb.tag }}
+          image: {{ $.Values.registry }}{{- if $.Values.registry }}/{{- end }}{{ $.Values.externalScalerWeb.image }}:{{ $.Values.externalScalerWeb.tag }}
           imagePullPolicy: {{ $.Values.externalScalerWeb.pullPolicy }}
+      imagePullSecrets:
+          - name: {{ $.Values.imagePullSecret }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -115,9 +117,11 @@ spec:
       subdomain: {{ .Values.externalScalerServer.subdomain }}
       containers:
         - name: {{ .Values.externalScalerServer.name }}
-          image: {{ $.Values.externalScalerServer.image }}:{{ $.Values.externalScalerServer.tag }}
+          image: {{ $.Values.registry }}{{- if $.Values.registry }}/{{- end }}{{ $.Values.externalScalerServer.image }}:{{ $.Values.externalScalerServer.tag }}
           imagePullPolicy: {{ $.Values.externalScalerServer.pullPolicy }}
           env:
             - name: NUMBER_OF_JOBS_PER_SERVER
               value: "{{ .Values.externalScalerServer.numberOfJobsPerServer }}"
+      imagePullSecrets:
+          - name: {{ $.Values.imagePullSecret }}
 ---
