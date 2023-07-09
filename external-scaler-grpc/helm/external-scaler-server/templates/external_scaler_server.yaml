@@ -94,8 +94,10 @@ spec:
         - name: {{ .Values.externalScalerWeb.name }}
           image: {{ $.Values.registry }}{{- if $.Values.registry }}/{{- end }}{{ $.Values.externalScalerWeb.image }}:{{ $.Values.externalScalerWeb.tag }}
           imagePullPolicy: {{ $.Values.externalScalerWeb.pullPolicy }}
+{{- if .Values.imagePullSecret }}
       imagePullSecrets:
           - name: {{ $.Values.imagePullSecret }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -122,6 +124,8 @@ spec:
           env:
             - name: NUMBER_OF_JOBS_PER_SERVER
               value: "{{ .Values.externalScalerServer.numberOfJobsPerServer }}"
+{{- if .Values.imagePullSecret }}
       imagePullSecrets:
           - name: {{ $.Values.imagePullSecret }}
+{{- end }}
 ---

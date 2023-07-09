@@ -1,6 +1,3 @@
-registry:
-imagePullSecret: registrycredentials
-
 worker:
   name: worker
   kind: StatefulSet
@@ -74,3 +71,7 @@ autoscaling:
       # This property specifies whether the target resource should be scaled back to original replicas count, after the ScaledObject is deleted. 
       # Default behavior is to keep the replica count at the same number as it is in the moment of ScaledObject's deletion.
       restoreToOriginalReplicaCount: true
+
+registry:
+
+imagePullSecret:
