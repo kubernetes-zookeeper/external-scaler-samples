@@ -14,6 +14,10 @@ The gRPC API endpoints that should be added to your application are specified by
 The following example is building and running `external-scaler-server` that is serving as the gRPC server of your application.<br>
 Based on the periodic response from the `external-scaler-server`, KEDA external [ScaledObject](external-scaler-grpc/helm/external-scaler-server/templates/keda_scaled_object_deployment.yaml) is scaling the number of `worker` pods (`replicas`).<br>
 
+
+![KEDA-External-Scaler](https://github.com/kubernetes-zookeeper/external-scaler-samples/assets/112578195/3cf7672f-17c0-4df2-a439-c1d5b85cd1b0)
+
+
 ## KEDA External Scaler Server
 
 - [External scaler](external-scaler-grpc/src/main/java/io/grpc/examples/externalscaler)
