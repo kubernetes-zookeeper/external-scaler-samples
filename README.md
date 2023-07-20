@@ -23,7 +23,8 @@ Based on the periodic response from the `external-scaler-server`, KEDA external 
 - [External scaler](external-scaler-grpc/src/main/java/io/grpc/examples/externalscaler)
 
 ### <a name="to-build-the-examples"></a> To build the [KEDA](https://keda.sh/docs/latest/concepts/external-scalers/) External Scaler Server example 
- 
+
+2. To try the external scaler please run (from the top level `external-scaler-samples` directory):
 1. From the top level `external-scaler-samples` directory:
    <br>
    Download gradle 7.4 package and extract it to the gradle folder.
