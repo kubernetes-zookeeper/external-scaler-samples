@@ -5,3 +5,5 @@ external-scaler-grpc/.gradle
 .gradle
 .idea
 *.iml
+gradle.zip
+gradle/
