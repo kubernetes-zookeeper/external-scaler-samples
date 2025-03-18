@@ -126,6 +126,10 @@ In different terminal windows you may run the following commands and view the lo
 </code></pre>
 <pre><code>helm uninstall keda --namespace keda
 </code></pre>
+<pre><code>kubectl delete ns external-scaler-server
+</code></pre>
+<pre><code>kubectl delete ns keda
+</code></pre>
 <h2 id="reference">Reference</h2>
 <ul>
 <li>The documentation of the KEDA External Scalers is here: <a href="https://keda.sh/docs/latest/concepts/external-scalers/">External scalers</a></li>
