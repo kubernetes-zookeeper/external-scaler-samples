@@ -30,6 +30,7 @@ spec:
             periodSeconds: 15
   triggers:
   - type: external
+    metricType: AverageValue
     metadata:
       scalerAddress: {{ .Values.autoscaling.scaledObject.externalScalerAddress }}:{{ .Values.externalScalerServer.service.grpc.port }}
       serviceOrchestrationUrl: http://{{ .Values.autoscaling.scaledObject.externalScalerWebAddress }}:8080/external-scaler-web/api/jobs
