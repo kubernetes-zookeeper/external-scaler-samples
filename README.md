@@ -46,7 +46,7 @@ The `kuberneteszookeeper/external-scaler-web` and `kuberneteszookeeper/external-
 ./external-scaler-grpc/keda/install_keda.sh
 ```
 ```
-helm upgrade --install external-scaler-server ./external-scaler-grpc/helm/external-scaler-server/ --namespace external-scaler-server --create-namespace --values ./external-scaler-grpc/helm/external-scaler-server/values.yaml --set registry=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
+helm upgrade --install external-scaler-server ./external-scaler-grpc/helm/external-scaler-server/ --namespace external-scaler-server --create-namespace --values ./external-scaler-grpc/helm/external-scaler-server/values.yaml
 ```
 The [external](https://keda.sh/docs/latest/scalers/external/) KEDA ScaledObject is now periodically polling the external-scaler-server (over gRPC protocol) for the name/value of the metric.
 Based on the value (and the target size for this metric), KEDA is scaling the related worker Deployment/StatefulSet.
